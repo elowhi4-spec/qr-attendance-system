@@ -4,145 +4,177 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QR Attendance System</title>
-
-<!-- QR SCANNER LIBRARY -->
 <script src="https://unpkg.com/html5-qrcode"></script>
-
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@600&display=swap" rel="stylesheet">
 <style>
+/* RESET & BODY */
+* { margin:0; padding:0; box-sizing:border-box; }
 body {
-    font-family: "Segoe UI", sans-serif;
-    margin: 0;
-    background: linear-gradient(180deg, #0a1f44, #1e3c72);
-    color: white;
+  font-family: 'Roboto', sans-serif;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  min-height:100vh;
+  color:#fff;
 }
 
+/* HEADER */
 h1 {
-    text-align: center;
-    padding: 15px;
-    margin: 0;
-    font-size: 22px;
-    background: #0d1b3d;
-    border-bottom: 3px solid gold;
+  text-align:center;
+  padding:20px;
+  font-family: 'Montserrat', sans-serif;
+  font-size:28px;
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(10px);
+  border-bottom: 3px solid gold;
+  letter-spacing:1px;
 }
 
+/* TOP PANEL */
 .top-panel {
-    margin: 10px;
-    padding: 15px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    text-align: center;
+  max-width: 500px;
+  margin:20px auto;
+  padding:20px;
+  border-radius:20px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  text-align:center;
 }
 
-#date {
-    font-size: 14px;
-    margin-bottom: 8px;
-}
+/* DATE */
+#date { font-size:16px; margin-bottom:12px; font-weight:500; }
 
+/* PRESENT BOX */
 .present-box {
-    background: linear-gradient(135deg, #ff3b3b, #ff7b00);
-    padding: 10px;
-    border-radius: 10px;
-    font-weight: bold;
-    margin-bottom: 10px;
+  background: linear-gradient(135deg,#ff416c,#ff4b2b);
+  padding:12px;
+  border-radius:12px;
+  font-weight:bold;
+  margin-bottom:15px;
+  font-size:16px;
+  letter-spacing:1px;
+  transition: all 0.3s ease;
+}
+.present-box:hover {
+  transform: scale(1.03);
 }
 
+/* BUTTONS */
 button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 8px;
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-    background: linear-gradient(135deg, gold, #ffd700);
-    color: black;
-    font-size: 14px;
-    cursor: pointer;
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border:none;
+  border-radius:12px;
+  font-weight:700;
+  font-size:15px;
+  color:#fff;
+  cursor:pointer;
+  background: linear-gradient(135deg,#00c6ff,#0072ff);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+button:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
 }
 
+/* CAMERA BOX */
 .camera-box {
-    margin-top: 10px;
-    background: #0d1b3d;
-    padding: 10px;
-    border-radius: 12px;
-    max-width: 420px;
-    margin-left: auto;
-    margin-right: auto;
+  margin-top:20px;
+  background: rgba(255,255,255,0.05);
+  padding:20px;
+  border-radius:20px;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 6px 25px rgba(0,0,0,0.25);
 }
 
+/* QR READER */
 #reader {
-    width: 100%;
-    border-radius: 10px;
-    overflow: hidden;
-    border: 3px solid #2ecc71;
+  width:100%;
+  border-radius:15px;
+  overflow:hidden;
+  border:3px solid #00f0ff;
+  margin-bottom:15px;
 }
 
+/* SECTIONS & STUDENTS */
 .section {
-    margin: 10px;
-    padding: 10px;
-    border-radius: 16px;
-    background: #0d1b3d;
+  max-width: 900px;
+  margin: 20px auto;
+  padding:20px;
+  border-radius:25px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 6px 30px rgba(0,0,0,0.3);
+}
+.section h2 {
+  margin-bottom:15px;
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing:1px;
+  font-size:22px;
+  color:#00f0ff;
+  text-align:center;
 }
 
+/* STUDENT GRID */
 .students {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:15px;
 }
 
+/* STUDENT CARD */
 .student {
-    padding: 10px;
-    border-radius: 10px;
-    text-align: center;
-    background: #1e3c72;
-    font-size: 13px;
+  background: rgba(255,255,255,0.1);
+  padding:15px;
+  border-radius:15px;
+  text-align:center;
+  font-size:14px;
+  transition: all 0.3s ease;
+  cursor:default;
+}
+.student:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
+/* PRESENT */
 .student.present {
-    background: linear-gradient(135deg, #ff3b3b, gold);
-    color: black;
-    font-weight: bold;
+  background: linear-gradient(135deg,#ff416c,#ff4b2b);
+  color:#fff;
+  font-weight:700;
 }
-
 .time {
-    font-size: 11px;
-    margin-top: 4px;
+  font-size:12px;
+  margin-top:5px;
+  color:#fff;
 }
 
-@media (min-width: 768px) {
-    .students {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    button {
-        width: auto;
-        margin: 5px;
-    }
+/* RESPONSIVE */
+@media(max-width:768px){
+  .top-panel, .section{ padding:15px; border-radius:18px; }
+  h1{ font-size:24px; }
 }
 </style>
 </head>
 <body>
 
-<h1>📷 QR Code Attendance</h1>
+<h1>📷 QR Attendance System</h1>
 
 <div class="top-panel">
+  <div id="date"></div>
+  <div class="present-box">Present: <span id="presentCount">0</span> / 50</div>
+  <button id="excelBtn">📥 Export Excel</button>
+  <button id="wordBtn">📄 Export Word</button>
+  <button id="resetBtn">🔄 Reset Attendance</button>
 
-    <div id="date"></div>
-
-    <div class="present-box">
-        Present: <span id="presentCount">0</span> / 50
-    </div>
-
-    <button id="excelBtn">📥 Export Excel</button>
-    <button id="wordBtn">📄 Export Word</button>
-    <button id="resetBtn">🔄 Reset Attendance</button>
-
-    <div class="camera-box">
-        <h3>📷 Scan QR</h3>
-        <div id="reader"></div>
-        <button id="switchCamBtn">🔄 Switch Camera</button>
-        <button id="startScanBtn">▶️ Start Scan</button>
-        <button id="stopScanBtn">⏸ Stop Scan</button>
-    </div>
+  <div class="camera-box">
+    <h3>📷 Scan QR</h3>
+    <div id="reader"></div>
+    <button id="switchCamBtn">🔄 Switch Camera</button>
+    <button id="startScanBtn">▶️ Start Scan</button>
+    <button id="stopScanBtn">⏸ Stop Scan</button>
+  </div>
 </div>
 
 <div id="container"></div>
@@ -150,126 +182,100 @@ button {
 <script>
 /* DATE */
 const today = new Date().toDateString();
-document.getElementById("date").textContent = "📅 Date: " + today;
-const STORAGE_KEY = "qr_attendance_" + today;
+document.getElementById("date").textContent = "📅 Date: "+today;
+const STORAGE_KEY="qr_attendance_"+today;
 
-/* STUDENT MAP (IDs must match QR codes) */
-const studentMap = {
-    "A001": { name: "Alice", section: "Section A" },
-    "A002": { name: "Bob", section: "Section A" },
-    "A003": { name: "Charlie", section: "Section A" },
-    "A004": { name: "David", section: "Section A" },
-    "A005": { name: "Emma", section: "Section A" },
-    "A006": { name: "Frank", section: "Section A" },
-    "A007": { name: "Grace", section: "Section A" },
-    "A008": { name: "Hannah", section: "Section A" },
-    "A009": { name: "Ian", section: "Section A" },
-    "A010": { name: "Jack", section: "Section A" },
-    "A011": { name: "Kara", section: "Section A" },
-    "A012": { name: "Liam", section: "Section A" },
-    "A013": { name: "Mia", section: "Section A" },
-    "A014": { name: "Noah", section: "Section A" },
-    "A015": { name: "Olivia", section: "Section A" },
-    "A016": { name: "Peter", section: "Section A" },
-    "A017": { name: "Quinn", section: "Section A" },
-    // Add Section B and C IDs similarly...
+/* STUDENT MAP */
+const sections={
+"Section A":[
+ {id:"A001", name:"Alice"}, {id:"A002", name:"Bob"}, {id:"A003", name:"Charlie"}, {id:"A004", name:"David"},
+ {id:"A005", name:"Emma"}, {id:"A006", name:"Frank"}, {id:"A007", name:"Grace"}, {id:"A008", name:"Hannah"},
+ {id:"A009", name:"Ian"}, {id:"A010", name:"Jack"}, {id:"A011", name:"Kara"}, {id:"A012", name:"Liam"},
+ {id:"A013", name:"Mia"}, {id:"A014", name:"Noah"}, {id:"A015", name:"Olivia"}, {id:"A016", name:"Peter"},
+ {id:"A017", name:"Quinn"}
+],
+"Section B":[
+ {id:"B001", name:"Ryan"}, {id:"B002", name:"Sophia"}, {id:"B003", name:"Tom"}, {id:"B004", name:"Uma"},
+ {id:"B005", name:"Victor"}, {id:"B006", name:"Wendy"}, {id:"B007", name:"Xander"}, {id:"B008", name:"Yara"},
+ {id:"B009", name:"Zane"}, {id:"B010", name:"Amy"}, {id:"B011", name:"Brian"}, {id:"B012", name:"Clara"},
+ {id:"B013", name:"Derek"}, {id:"B014", name:"Ella"}, {id:"B015", name:"Felix"}, {id:"B016", name:"Gina"},
+ {id:"B017", name:"Henry"}
+],
+"Section C":[
+ {id:"C001", name:"Isla"}, {id:"C002", name:"Jake"}, {id:"C003", name:"Kate"}, {id:"C004", name:"Leo"},
+ {id:"C005", name:"Maya"}, {id:"C006", name:"Nate"}, {id:"C007", name:"Opal"}, {id:"C008", name:"Paul"},
+ {id:"C009", name:"Queen"}, {id:"C010", name:"Rose"}, {id:"C011", name:"Sam"}, {id:"C012", name:"Tina"},
+ {id:"C013", name:"Ulysses"}, {id:"C014", name:"Vera"}, {id:"C015", name:"Will"}, {id:"C016", name:"Xena"}
+]
 };
 
-/* LOAD ATTENDANCE */
-let attendanceData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-let presentCount = Object.keys(attendanceData).length;
+let attendanceData=JSON.parse(localStorage.getItem(STORAGE_KEY))||{};
+let presentCount=Object.keys(attendanceData).length;
 
-/* BUILD STUDENT LIST */
-const container = document.getElementById("container");
-for (const id in studentMap){
-    const student = studentMap[id];
-    const div = document.createElement("div");
-    div.className = "student";
-    div.id = student.name;
-    div.innerHTML = `${student.name}<div class="time"></div>`;
-    if(attendanceData[id]){
-        div.classList.add("present");
-        div.querySelector(".time").textContent = "⏰ " + attendanceData[id].time;
-    }
-    container.appendChild(div);
+const container=document.getElementById("container");
+const studentMap={};
+
+/* BUILD UI */
+for(const secName in sections){
+ const secDiv=document.createElement("div");
+ secDiv.className="section";
+ secDiv.innerHTML=`<h2>${secName}</h2>`;
+ const grid=document.createElement("div");
+ grid.className="students";
+ sections[secName].forEach(s=>{
+   const div=document.createElement("div");
+   div.className="student";
+   div.id=s.id;
+   div.innerHTML=`${s.name}<div class="time"></div>`;
+   if(attendanceData[s.id]){
+     div.classList.add("present");
+     div.querySelector(".time").textContent="⏰ "+attendanceData[s.id].time;
+   }
+   grid.appendChild(div);
+   studentMap[s.id]={element:div, section:secName, name:s.name};
+ });
+ secDiv.appendChild(grid);
+ container.appendChild(secDiv);
 }
 
-document.getElementById("presentCount").textContent = presentCount;
+document.getElementById("presentCount").textContent=presentCount;
 
 /* BUTTONS */
-document.getElementById("excelBtn").addEventListener("click", () => {
-    window.location.href = "/export";
-});
-document.getElementById("wordBtn").addEventListener("click", () => {
-    window.location.href = "/export-word";
-});
-document.getElementById("resetBtn").addEventListener("click", () => {
-    if(confirm("Reset all attendance?")){
-        localStorage.removeItem(STORAGE_KEY);
-        fetch("/reset",{ method:"POST" }).finally(()=>location.reload());
-    }
+document.getElementById("excelBtn").addEventListener("click",()=>window.location.href="/export");
+document.getElementById("wordBtn").addEventListener("click",()=>window.location.href="/export-word");
+document.getElementById("resetBtn").addEventListener("click",()=>{
+ if(confirm("Reset all attendance?")){
+   localStorage.removeItem(STORAGE_KEY);
+   fetch("/reset",{method:"POST"}).finally(()=>location.reload());
+ }
 });
 
 /* QR SCANNER */
-let html5QrCode = new Html5Qrcode("reader");
-let cameras = [];
-let currentCameraIndex = 0;
-let scanning = false;
+let html5QrCode=new Html5Qrcode("reader");
+let cameras=[],currentCameraIndex=0,scanning=false;
 
 function onScanSuccess(decodedText){
-    if(attendanceData[decodedText]) return; // prevent duplicate
-    const student = studentMap[decodedText];
-    if(!student) return;
-    const time = new Date().toLocaleTimeString();
-    attendanceData[decodedText] = { section: student.section, time };
-    const div = document.getElementById(student.name);
-    if(div){
-        div.classList.add("present");
-        div.querySelector(".time").textContent = "⏰ " + time;
-    }
-    presentCount = Object.keys(attendanceData).length;
-    document.getElementById("presentCount").textContent = presentCount;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(attendanceData));
-    fetch("/attendance", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ id: decodedText, section: student.section, time })
-    });
+ if(attendanceData[decodedText]) return;
+ const student=studentMap[decodedText];
+ if(!student) return;
+ const time=new Date().toLocaleTimeString();
+ attendanceData[decodedText]={section:student.section, time};
+ student.element.classList.add("present");
+ student.element.querySelector(".time").textContent="⏰ "+time;
+ presentCount=Object.keys(attendanceData).length;
+ document.getElementById("presentCount").textContent=presentCount;
+ localStorage.setItem(STORAGE_KEY, JSON.stringify(attendanceData));
+ fetch("/attendance",{method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({id:decodedText, section:student.section, time})});
 }
 
-function startScanner(cameraId){
-    html5QrCode.start(cameraId, { fps:10, qrbox:250 }, onScanSuccess)
-    .then(()=>scanning=true)
-    .catch(err=>console.error(err));
-}
+function startScanner(cameraId){ html5QrCode.start(cameraId,{fps:10, qrbox:250},onScanSuccess).then(()=>scanning=true).catch(err=>console.error(err)); }
+function stopScanner(){ html5QrCode.stop().then(()=>scanning=false).catch(err=>console.error(err)); }
 
-function stopScanner(){
-    html5QrCode.stop().then(()=>scanning=false).catch(err=>console.error(err));
-}
+Html5Qrcode.getCameras().then(devs=>{ cameras=devs; if(cameras.length>0){ currentCameraIndex=cameras.length-1; startScanner(cameras[currentCameraIndex].id); } });
 
-/* GET CAMERAS */
-Html5Qrcode.getCameras().then(devs=>{
-    cameras=devs;
-    if(cameras.length>0){
-        currentCameraIndex = cameras.length - 1; // back camera
-        startScanner(cameras[currentCameraIndex].id);
-    }
-});
-
-/* CAMERA SWITCH BUTTON */
-document.getElementById("switchCamBtn").addEventListener("click", ()=>{
-    if(cameras.length<2) return alert("No second camera found!");
-    currentCameraIndex=(currentCameraIndex+1)%cameras.length;
-    if(scanning) stopScanner().then(()=>startScanner(cameras[currentCameraIndex].id));
-});
-
-/* START/STOP BUTTONS */
-document.getElementById("startScanBtn").addEventListener("click", ()=>{
-    if(!scanning && cameras.length>0) startScanner(cameras[currentCameraIndex].id);
-});
-document.getElementById("stopScanBtn").addEventListener("click", ()=>{
-    if(scanning) stopScanner();
-});
+document.getElementById("switchCamBtn").addEventListener("click",()=>{ if(cameras.length<2)return alert("No second camera!"); currentCameraIndex=(currentCameraIndex+1)%cameras.length; if(scanning) stopScanner().then(()=>startScanner(cameras[currentCameraIndex].id)); });
+document.getElementById("startScanBtn").addEventListener("click",()=>{ if(!scanning && cameras.length>0) startScanner(cameras[currentCameraIndex].id); });
+document.getElementById("stopScanBtn").addEventListener("click",()=>{ if(scanning) stopScanner(); });
 </script>
 
 </body>
