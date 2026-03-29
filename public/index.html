@@ -138,6 +138,9 @@ button {
     <div class="camera-box">
         <h3>📷 Scan QR</h3>
         <div id="reader"></div>
+        <button id="switchCamBtn">🔄 Switch Camera</button>
+        <button id="startScanBtn">▶️ Start Scan</button>
+        <button id="stopScanBtn">⏸ Stop Scan</button>
     </div>
 </div>
 
@@ -237,17 +240,44 @@ function onScanSuccess(decodedText) {
     });
 }
 
-/* ✅ START SCANNER (YOU WERE MISSING THIS) */
-const html5QrCode = new Html5Qrcode("reader");
+/* ✅ START SCANNER WITH CAMERA SWITCH */
+let html5QrCode = new Html5Qrcode("reader");
+let cameras = [];
+let currentCameraIndex = 0;
+let scanning = false;
 
-Html5Qrcode.getCameras().then(devices => {
-    if (devices && devices.length) {
-        html5QrCode.start(
-            devices[0].id,
-            { fps: 10, qrbox: 250 },
-            onScanSuccess
-        );
-    }
+function startScanner(cameraId) {
+    html5QrCode.start(
+        cameraId,
+        { fps: 10, qrbox: 250 },
+        onScanSuccess
+    ).then(() => scanning = true)
+     .catch(err => console.error(err));
+}
+
+function stopScanner() {
+    html5QrCode.stop().then(() => scanning = false).catch(err => console.error(err));
+}
+
+// Get all cameras
+Html5Qrcode.getCameras().then(devs => {
+    cameras = devs;
+});
+
+// Start/Stop buttons
+document.getElementById("startScanBtn").addEventListener("click", () => {
+    if (!scanning && cameras.length > 0) startScanner(cameras[currentCameraIndex].id);
+});
+
+document.getElementById("stopScanBtn").addEventListener("click", () => {
+    if (scanning) stopScanner();
+});
+
+// Switch camera button
+document.getElementById("switchCamBtn").addEventListener("click", () => {
+    if (cameras.length < 2) return alert("No second camera found!");
+    currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+    if (scanning) stopScanner().then(() => startScanner(cameras[currentCameraIndex].id));
 });
 </script>
 
