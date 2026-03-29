@@ -153,20 +153,18 @@ const today = new Date().toDateString();
 document.getElementById("date").textContent = "📅 Date: " + today;
 const STORAGE_KEY = "qr_attendance_" + today;
 
-/* SECTIONS */
+/* STUDENT NAMES */
 const sections = {
-    "Section A": 17,
-    "Section B": 17,
-    "Section C": 16
+    "Section A": ["Alice", "Bob", "Charlie", "David", "Emma", "Frank", "Grace", "Hannah", "Ian", "Jack", "Kara", "Liam", "Mia", "Noah", "Olivia", "Peter", "Quinn"],
+    "Section B": ["Ryan", "Sophia", "Tom", "Uma", "Victor", "Wendy", "Xander", "Yara", "Zane", "Amy", "Brian", "Clara", "Derek", "Ella", "Felix", "Gina", "Henry"],
+    "Section C": ["Isla", "Jake", "Kate", "Leo", "Maya", "Nate", "Opal", "Paul", "Queen", "Rose", "Sam", "Tina", "Ulysses", "Vera", "Will", "Xena"]
 };
 
 let attendanceData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 let presentCount = 0;
-
 const container = document.getElementById("container");
 
 /* BUILD STUDENT LIST */
-let studentNum = 1;
 const studentMap = {};
 
 for (let section in sections) {
@@ -177,12 +175,10 @@ for (let section in sections) {
     const grid = document.createElement("div");
     grid.className = "students";
 
-    for (let i = 0; i < sections[section]; i++) {
-        const name = "Student " + studentNum;
-
+    sections[section].forEach(name => {
         const div = document.createElement("div");
         div.className = "student";
-        div.id = name;
+        div.id = name; // QR must match name
         div.innerHTML = `${name}<div class="time"></div>`;
 
         if (attendanceData[name]) {
@@ -193,8 +189,7 @@ for (let section in sections) {
 
         studentMap[name] = { element: div, section: section };
         grid.appendChild(div);
-        studentNum++;
-    }
+    });
 
     secDiv.appendChild(grid);
     container.appendChild(secDiv);
@@ -211,27 +206,30 @@ document.getElementById("wordBtn").addEventListener("click", () => {
     window.location.href = "/export-word";
 });
 
-/* RESET BUTTON FIXED */
+/* RESET BUTTON FIX */
 document.getElementById("resetBtn").addEventListener("click", () => {
     if (confirm("Reset all attendance?")) {
-        // Clear local storage
         localStorage.removeItem(STORAGE_KEY);
-
-        // Reset on server (optional)
-        fetch("/reset", { method: "POST" }).finally(() => {
-            location.reload();
-        });
+        fetch("/reset", { method: "POST" }).finally(() => location.reload());
     }
 });
 
 /* QR SCANNER */
+let html5QrCode = new Html5Qrcode("reader");
+let cameras = [];
+let currentCameraIndex = 0;
+let scanning = false;
+
 function onScanSuccess(decodedText) {
+    // Prevent duplicate scans
+    if (attendanceData[decodedText]) return;
+
     const student = studentMap[decodedText];
     if (!student) return;
 
     const time = new Date().toLocaleTimeString();
-
     attendanceData[decodedText] = { section: student.section, time: time };
+
     student.element.classList.add("present");
     student.element.querySelector(".time").textContent = "⏰ " + time;
 
@@ -240,19 +238,12 @@ function onScanSuccess(decodedText) {
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(attendanceData));
 
-    // SEND TO SERVER
     fetch("/attendance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: decodedText, section: student.section, time: time })
     });
 }
-
-/* SCANNER + CAMERA SWITCH */
-let html5QrCode = new Html5Qrcode("reader");
-let cameras = [];
-let currentCameraIndex = 0;
-let scanning = false;
 
 function startScanner(cameraId) {
     html5QrCode.start(
@@ -267,12 +258,11 @@ function stopScanner() {
     html5QrCode.stop().then(() => scanning = false).catch(err => console.error(err));
 }
 
-// Get all cameras and auto-start back camera
+// Get cameras and auto-start back camera
 Html5Qrcode.getCameras().then(devs => {
     cameras = devs;
     if (cameras.length > 0) {
-        // Try to use back camera first (usually last in the array)
-        currentCameraIndex = cameras.length - 1;
+        currentCameraIndex = cameras.length - 1; // back camera
         startScanner(cameras[currentCameraIndex].id);
     }
 });
