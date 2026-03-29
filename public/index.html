@@ -1,107 +1,112 @@
 <script>
-/* DATE */
-const today = new Date().toDateString();
-document.getElementById("date").textContent = "📅 Date: " + today;
-const STORAGE_KEY = "qr_attendance_" + today;
+document.addEventListener("DOMContentLoaded", () => {
+    /* DATE */
+    const today = new Date().toDateString();
+    const dateEl = document.getElementById("date");
+    if (dateEl) dateEl.textContent = "📅 Date: " + today;
 
-/* SECTIONS */
-const sections = {
-    "Section A": 17,
-    "Section B": 17,
-    "Section C": 16
-};
+    const STORAGE_KEY = "qr_attendance_" + today;
 
-let attendanceData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-let presentCount = 0;
+    /* SECTIONS */
+    const sections = {
+        "Section A": 17,
+        "Section B": 17,
+        "Section C": 16
+    };
 
-const container = document.getElementById("container");
+    let attendanceData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    let presentCount = 0;
 
-/* BUILD STUDENT LIST */
-let studentNum = 1;
-const studentMap = {};
+    const container = document.getElementById("container");
+    if (!container) return; // stop if container doesn't exist
 
-for (let section in sections) {
-    const secDiv = document.createElement("div");
-    secDiv.className = "section";
-    secDiv.innerHTML = `<h2>${section}</h2>`;
+    /* BUILD STUDENT LIST */
+    let studentNum = 1;
+    const studentMap = {};
 
-    const grid = document.createElement("div");
-    grid.className = "students";
+    for (let section in sections) {
+        const secDiv = document.createElement("div");
+        secDiv.className = "section";
+        secDiv.innerHTML = `<h2>${section}</h2>`;
 
-    for (let i = 0; i < sections[section]; i++) {
-        const name = "Student " + studentNum;
+        const grid = document.createElement("div");
+        grid.className = "students";
 
-        const div = document.createElement("div");
-        div.className = "student";
-        div.id = name;
-        div.innerHTML = `${name}<div class="time"></div>`;
+        for (let i = 0; i < sections[section]; i++) {
+            const name = "Student " + studentNum;
 
-        if (attendanceData[name]) {
-            div.classList.add("present");
-            div.querySelector(".time").textContent = "⏰ " + attendanceData[name].time;
-            presentCount++;
+            const div = document.createElement("div");
+            div.className = "student";
+            div.id = name;
+            div.innerHTML = `${name}<div class="time"></div>`;
+
+            if (attendanceData[name]) {
+                div.classList.add("present");
+                div.querySelector(".time").textContent = "⏰ " + attendanceData[name].time;
+                presentCount++;
+            }
+
+            studentMap[name] = { element: div, section: section };
+            grid.appendChild(div);
+            studentNum++;
         }
 
-        studentMap[name] = { element: div, section: section };
-        grid.appendChild(div);
-        studentNum++;
+        secDiv.appendChild(grid);
+        container.appendChild(secDiv);
     }
 
-    secDiv.appendChild(grid);
-    container.appendChild(secDiv);
-}
+    const presentEl = document.getElementById("presentCount");
+    if (presentEl) presentEl.textContent = presentCount;
 
-document.getElementById("presentCount").textContent = presentCount;
+    /* ✅ BUTTONS */
+    const excelBtn = document.getElementById("excelBtn");
+    if (excelBtn) excelBtn.addEventListener("click", () => window.location.href = "/export");
 
-/* ✅ BUTTONS (MOVED OUTSIDE) */
-document.getElementById("excelBtn").addEventListener("click", () => {
-    window.location.href = "/export";
-});
+    const wordBtn = document.getElementById("wordBtn");
+    if (wordBtn) wordBtn.addEventListener("click", () => window.location.href = "/export-word");
 
-document.getElementById("wordBtn").addEventListener("click", () => {
-    window.location.href = "/export-word";
-});
-
-document.getElementById("resetBtn").addEventListener("click", () => {
-    if (confirm("Reset all attendance?")) {
-        fetch("/reset", { method: "POST" }).then(() => location.reload());
-    }
-});
-
-/* QR SCANNER */
-function onScanSuccess(decodedText) {
-    const student = studentMap[decodedText];
-    if (!student) return;
-
-    const time = new Date().toLocaleTimeString();
-
-    attendanceData[decodedText] = { section: student.section, time: time };
-    student.element.classList.add("present");
-    student.element.querySelector(".time").textContent = "⏰ " + time;
-
-    presentCount = Object.keys(attendanceData).length;
-    document.getElementById("presentCount").textContent = presentCount;
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(attendanceData));
-
-    // SEND TO SERVER
-    fetch("/attendance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: decodedText, section: student.section, time: time })
+    const resetBtn = document.getElementById("resetBtn");
+    if (resetBtn) resetBtn.addEventListener("click", () => {
+        if (confirm("Reset all attendance?")) {
+            fetch("/reset", { method: "POST" }).then(() => location.reload());
+        }
     });
-}
 
-/* ✅ START SCANNER (YOU WERE MISSING THIS) */
-const html5QrCode = new Html5Qrcode("reader");
+    /* QR SCANNER */
+    function onScanSuccess(decodedText) {
+        const student = studentMap[decodedText];
+        if (!student) return;
 
-Html5Qrcode.getCameras().then(devices => {
-    if (devices && devices.length) {
-        html5QrCode.start(
-            devices[0].id,
-            { fps: 10, qrbox: 250 },
-            onScanSuccess
-        );
+        const time = new Date().toLocaleTimeString();
+
+        attendanceData[decodedText] = { section: student.section, time: time };
+        student.element.classList.add("present");
+        student.element.querySelector(".time").textContent = "⏰ " + time;
+
+        presentCount = Object.keys(attendanceData).length;
+        if (presentEl) presentEl.textContent = presentCount;
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(attendanceData));
+
+        // SEND TO SERVER
+        fetch("/attendance", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: decodedText, section: student.section, time: time })
+        });
     }
+
+    /* ✅ START SCANNER */
+    const html5QrCode = new Html5Qrcode("reader");
+
+    Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length) {
+            html5QrCode.start(
+                devices[0].id,
+                { fps: 10, qrbox: 250 },
+                onScanSuccess
+            );
+        }
+    });
 });
 </script>
