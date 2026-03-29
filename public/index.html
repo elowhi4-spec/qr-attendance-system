@@ -57,6 +57,7 @@ button {
     background: linear-gradient(135deg, gold, #ffd700);
     color: black;
     font-size: 14px;
+    cursor: pointer;
 }
 
 .camera-box {
@@ -201,7 +202,7 @@ for (let section in sections) {
 
 document.getElementById("presentCount").textContent = presentCount;
 
-/* ✅ BUTTONS (MOVED OUTSIDE) */
+/* BUTTONS */
 document.getElementById("excelBtn").addEventListener("click", () => {
     window.location.href = "/export";
 });
@@ -210,9 +211,16 @@ document.getElementById("wordBtn").addEventListener("click", () => {
     window.location.href = "/export-word";
 });
 
+/* RESET BUTTON FIXED */
 document.getElementById("resetBtn").addEventListener("click", () => {
     if (confirm("Reset all attendance?")) {
-        fetch("/reset", { method: "POST" }).then(() => location.reload());
+        // Clear local storage
+        localStorage.removeItem(STORAGE_KEY);
+
+        // Reset on server (optional)
+        fetch("/reset", { method: "POST" }).finally(() => {
+            location.reload();
+        });
     }
 });
 
@@ -240,7 +248,7 @@ function onScanSuccess(decodedText) {
     });
 }
 
-/* ✅ START SCANNER WITH CAMERA SWITCH */
+/* SCANNER + CAMERA SWITCH */
 let html5QrCode = new Html5Qrcode("reader");
 let cameras = [];
 let currentCameraIndex = 0;
@@ -259,9 +267,14 @@ function stopScanner() {
     html5QrCode.stop().then(() => scanning = false).catch(err => console.error(err));
 }
 
-// Get all cameras
+// Get all cameras and auto-start back camera
 Html5Qrcode.getCameras().then(devs => {
     cameras = devs;
+    if (cameras.length > 0) {
+        // Try to use back camera first (usually last in the array)
+        currentCameraIndex = cameras.length - 1;
+        startScanner(cameras[currentCameraIndex].id);
+    }
 });
 
 // Start/Stop buttons
